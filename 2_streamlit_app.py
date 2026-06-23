@@ -20,7 +20,7 @@
 # pin_lat = -20.591733
 # pin_lon = 116.777616
 
-# df = pd.read_csv(r"C:\Users\WA10VM\OneDrive - Woodside Energy Ltd\Desktop\IDCKMSTM0S.csv", header=4)
+# df = pd.read_csv("IDCKMSTM0S.csv", header=4)
 
 # df["Distance_km"] = df.apply(
 #     lambda row: haversine(pin_lat, pin_lon, row["LAT"], row["LON"]), axis=1
