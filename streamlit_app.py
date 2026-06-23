@@ -17,8 +17,8 @@ st.set_page_config(layout="wide")
 st.title("Cyclone Pass Counter")
 
 # ---------- Load CSV (update path if needed) ----------
-csv_path = r"C:\Users\WA10VM\OneDrive - Woodside Energy Ltd\Desktop\IDCKMSTM0S.csv"
-df = pd.read_csv(csv_path, header=4)
+# csv_path = r"C:\Users\WA10VM\OneDrive - Woodside Energy Ltd\Desktop\IDCKMSTM0S.csv"
+df = pd.read_csv(IDCKMSTM0S.csv, header=4)
 df["MAX_WIND_SPD"] = pd.to_numeric(df["MAX_WIND_SPD"], errors="coerce")
 df["MAX_WIND_GUST"] = pd.to_numeric(df["MAX_WIND_GUST"], errors="coerce")
 
