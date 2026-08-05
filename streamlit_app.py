@@ -120,15 +120,13 @@ for color_i, (cid, track) in enumerate(groups):
 
 tracks_json = json.dumps(cyclone_tracks)
 
-if cyclone_tracks:
-    summary_start_year = min([t["year"] for t in cyclone_tracks])
-    summary_end_year = max([t["year"] for t in cyclone_tracks])
-else:
-    summary_start_year = pd.Timestamp.now().year
-    summary_end_year = pd.Timestamp.now().year
+# Use the selected date-range slider values so the summary matches the filter
+summary_start_year = date_range[0].year
+summary_end_year = date_range[1].year
 
 summary_num_cyclones = len(cyclone_tracks)
 summary_num_days = len(unique_days)
+
 
 if not cyclone_tracks:
     st.info("No cyclones meet the current filters to animate.")
