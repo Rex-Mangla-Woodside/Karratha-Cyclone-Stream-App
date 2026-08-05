@@ -122,8 +122,11 @@ tracks_json = json.dumps(cyclone_tracks)
 
 if cyclone_tracks:
     summary_start_year = min([t["year"] for t in cyclone_tracks])
+    summary_end_year = max([t["year"] for t in cyclone_tracks])
 else:
     summary_start_year = pd.Timestamp.now().year
+    summary_end_year = pd.Timestamp.now().year
+
 summary_num_cyclones = len(cyclone_tracks)
 summary_num_days = len(unique_days)
 
@@ -203,6 +206,7 @@ def build_html(map_h):
   if (DEBUG) { console.log('DEBUG (client): tracks count =', tracks.length); console.log('pinLat, pinLon =', pinLat, pinLon, 'radiusKm =', radiusKm, 'pointSpeedMs =', pointSpeedMs); }
 
   var summaryStartYear = __SUMMARY_START_YEAR__;
+  var summaryEndYear = __SUMMARY_END_YEAR__;
   var summaryCyclonesCount = __SUMMARY_NUM_CYCLONES__;
   var summaryUniqueDays = __SUMMARY_NUM_DAYS__;
 
@@ -235,8 +239,13 @@ def build_html(map_h):
       statusEl.textContent = "Animation complete. " + tracks.length + " cyclone(s) shown.";
       playing = false; playPauseBtn.textContent = "Play";
       summaryBox.style.display = 'block';
-      summaryBox.innerHTML = 'From ' + summaryStartYear + ', within ' + radiusKm + ' km of Karratha Gas Plant there have been <br>' +
-        '<span style="font-size:34px;color:#c62828;">' + summaryCyclonesCount + '</span>' + ' cyclone' + (summaryCyclonesCount===1? '': 's') + ' across <span style="font-size:34px;color:#1565c0;">' + summaryUniqueDays + '</span>' + ' calendar day' + (summaryUniqueDays===1? '': 's') + '.';
+summaryBox.innerHTML =
+  'Between ' + summaryStartYear + ' and ' + summaryEndYear + ', ' +
+  '<span style="font-size:34px;color:#c62828;">' + summaryCyclonesCount + '</span>' +
+  ' tropical cyclone' + (summaryCyclonesCount === 1 ? '' : 's') +
+  ' tracked within ' + radiusKm + ' km of the Karratha Gas Plant across ' +
+  '<span style="font-size:34px;color:#1565c0;">' + summaryUniqueDays + '</span>' +
+  ' unique day' + (summaryUniqueDays === 1 ? '' : 's') + '.';
       return;
     }
     cycloneIdx = idx; pointIdx = 0; currentCoords = []; var t = tracks[cycloneIdx];
@@ -323,6 +332,7 @@ def build_html(map_h):
     html = html.replace("__POINT_SPEED_MS__", str(point_speed_ms))
     html = html.replace("__DEBUG__", str(debug_mode).lower())
     html = html.replace("__SUMMARY_START_YEAR__", str(summary_start_year))
+    html = html.replace("__SUMMARY_END_YEAR__", str(summary_end_year))
     html = html.replace("__SUMMARY_NUM_CYCLONES__", str(summary_num_cyclones))
     html = html.replace("__SUMMARY_NUM_DAYS__", str(summary_num_days))
     html = html.replace("__DOWNLOAD_FILENAME__", f"cyclone_animation_{summary_start_year}_{radius_km}km.webm")
