@@ -161,7 +161,7 @@ def build_html(map_h):
   #status { margin-top: 6px; color: #333; font-size:13px; }
   #mapwrap { position: relative; }
   #summary_box {
-    position: absolute; right: 8%; top: 50%; transform: translateY(-50%); z-index: 1200;
+    position: absolute; right: 30%; top: 50%; transform: translateY(-50%); z-index: 1200;
     background: rgba(255,255,255,0.98); padding: 20px 26px; border-radius: 10px;
     box-shadow: 0 2px 14px rgba(0,0,0,0.32); font-family: sans-serif; font-size: 26px; font-weight: 800;
     max-width: 560px; display: none; text-align: left; line-height:1.15;
