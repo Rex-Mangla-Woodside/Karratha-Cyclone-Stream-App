@@ -354,3 +354,36 @@ st.download_button(
 st.subheader("Cyclones within radius")
 display_table = within_radius.sort_values("Distance_km").drop_duplicates(subset="DISTURBANCE_ID", keep="first")
 st.dataframe(display_table[["DISTURBANCE_ID", "NAME", "TYPE", "TM", "LAT", "LON", "MAX_WIND_SPD", "MAX_WIND_GUST", "Distance_km"]])
+
+import altair as alt
+
+# ---- Cyclone seasonality by month ----
+st.subheader("Cyclone seasonality by month")
+
+wr = within_radius.copy()
+wr["Month"] = wr["TM_parsed"].dt.month
+
+month_names = ["Jan","Feb","Mar","Apr","May","Jun",
+               "Jul","Aug","Sep","Oct","Nov","Dec"]
+
+monthly = (wr.groupby("Month")["DISTURBANCE_ID"]
+             .nunique()
+             .reindex(range(1, 13), fill_value=0)
+             .reset_index())
+monthly["MonthName"] = [month_names[m-1] for m in monthly["Month"]]
+
+chart = (alt.Chart(monthly)
+         .mark_bar()
+         .encode(
+             x=alt.X("MonthName", sort=month_names, title="Month"),
+             y=alt.Y("DISTURBANCE_ID", title="Unique cyclones"),
+             color=alt.condition(
+                 alt.FieldOneOfPredicate(field="Month", oneOf=[11,12,1,2,3,4]),
+                 alt.value("#E1251B"),   # cyclone season red
+                 alt.value("#D9D9D9"))))
+
+st.altair_chart(chart, use_container_width=True)
+st.dataframe(monthly[["MonthName", "DISTURBANCE_ID"]]
+             .rename(columns={"DISTURBANCE_ID": "Unique cyclones"}),
+             hide_index=True)
+
