@@ -19,8 +19,8 @@ st.title("Cyclone Pass Counter")
 # ---------- Load CSV (update path if needed) ----------
 # csv_path = r"C:\Users\WA10VM\OneDrive - Woodside Energy Ltd\Desktop\IDCKMSTM0S.csv"
 df = pd.read_csv("IDCKMSTM0S.csv", header=4)
-df["MAX_WIND_SPD"] = pd.to_numeric(df["MAX_WIND_SPD"], errors="coerce")
-df["MAX_WIND_GUST"] = pd.to_numeric(df["MAX_WIND_GUST"], errors="coerce")
+df["MAX_WIND_SPD"] = (pd.to_numeric(df["MAX_WIND_SPD"], errors="coerce") * 3.6).round(1)
+df["MAX_WIND_GUST"] = (pd.to_numeric(df["MAX_WIND_GUST"], errors="coerce") * 3.6).round(1)
 
 # ---------- Pin & radius ----------
 st.subheader("Pin coordinates")
@@ -51,9 +51,9 @@ selected_types = f3.multiselect("Type", type_options)
 
 f4, f5 = st.columns(2)
 wind_min, wind_max = float(df["MAX_WIND_SPD"].min(skipna=True)), float(df["MAX_WIND_SPD"].max(skipna=True))
-wind_range = f4.slider("Max Wind Speed", min_value=wind_min, max_value=wind_max, value=(wind_min, wind_max))
+wind_range = f4.slider("Max Wind Speed (km/h)", min_value=wind_min, max_value=wind_max, value=(wind_min, wind_max))
 gust_min, gust_max = float(df["MAX_WIND_GUST"].min(skipna=True)), float(df["MAX_WIND_GUST"].max(skipna=True))
-gust_range = f5.slider("Max Wind Gust", min_value=gust_min, max_value=gust_max, value=(gust_min, gust_max))
+gust_range = f5.slider("Max Wind Gust (km/h)", min_value=gust_min, max_value=gust_max, value=(gust_min, gust_max))
 
 df["TM_parsed"] = pd.to_datetime(df["TM"], format="%d/%m/%Y %H:%M")
 tm_min, tm_max = df["TM_parsed"].min().date(), df["TM_parsed"].max().date()
@@ -353,7 +353,10 @@ st.download_button(
 # ---------- Table ----------
 st.subheader("Cyclones within radius")
 display_table = within_radius.sort_values("Distance_km").drop_duplicates(subset="DISTURBANCE_ID", keep="first")
-st.dataframe(display_table[["DISTURBANCE_ID", "NAME", "TYPE", "TM", "LAT", "LON", "MAX_WIND_SPD", "MAX_WIND_GUST", "Distance_km"]])
+st.dataframe(
+    display_table[["DISTURBANCE_ID", "NAME", "TYPE", "TM", "LAT", "LON", "MAX_WIND_SPD", "MAX_WIND_GUST", "Distance_km"]]
+    .rename(columns={"MAX_WIND_SPD": "MAX_WIND_SPD (km/h)", "MAX_WIND_GUST": "MAX_WIND_GUST (km/h)"})
+)
 
 import altair as alt
 
