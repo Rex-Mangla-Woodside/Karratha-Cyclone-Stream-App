@@ -253,7 +253,7 @@ summaryBox.innerHTML =
     scheduleNext();
   }
 
-  function addPoint() { var t = tracks[cycloneIdx]; if (pointIdx >= t.points.length) { startCyclone(cycloneIdx + 1); return; } var p = t.points[pointIdx]; currentCoords.push([p.lat, p.lon]); currentPolyline.setLatLngs(currentCoords); var marker = L.circleMarker([p.lat, p.lon], { radius:5, color: t.color, fillColor: t.color, fillOpacity:0.9, weight:1 }).addTo(map); marker.bindTooltip(t.id + " (" + t.name + ") | " + p.tm + " | " + p.dist + " km"); pointIdx += 1; fmtStatus(); scheduleNext(); }
+  function addPoint() { var t = tracks[cycloneIdx]; if (pointIdx >= t.points.length) { startCyclone(cycloneIdx + 1); return; } var p = t.points[pointIdx]; currentCoords.push([p.lat, p.lon]); currentPolyline.setLatLngs(currentCoords); var marker = L.circleMarker([p.lat, p.lon], { radius:5, color: t.color, fillColor: t.color, fillOpacity:0.9, weight:1 }).addTo(map); marker.bindTooltip(t.id + " (" + t.name + ") | " + p.tm + " | " + p.dist + " km | Wind: " + (p.wind !== null ? p.wind + " km/h" : "n/a")); }
 
   function scheduleNext() { if (!playing) return; timer = setTimeout(addPoint, pointSpeedMs); }
 
