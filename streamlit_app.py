@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 import json
 import streamlit.components.v1 as components
+import altair as alt
 
 def haversine_vectorized(lat1, lon1, lat2, lon2):
     R = 6371.0
@@ -19,6 +20,7 @@ st.title("Cyclone Pass Counter")
 # ---------- Load CSV (update path if needed) ----------
 # csv_path = r"C:\Users\WA10VM\OneDrive - Woodside Energy Ltd\Desktop\IDCKMSTM0S.csv"
 df = pd.read_csv("IDCKMSTM0S.csv", header=4)
+# Convert m/s -> km/h
 df["MAX_WIND_SPD"] = (pd.to_numeric(df["MAX_WIND_SPD"], errors="coerce") * 3.6).round(1)
 df["MAX_WIND_GUST"] = (pd.to_numeric(df["MAX_WIND_GUST"], errors="coerce") * 3.6).round(1)
 
@@ -115,7 +117,13 @@ for color_i, (cid, track) in enumerate(groups):
     year = int(track["TM_parsed"].iloc[0].year)
     points = []
     for row in track.itertuples(index=False):
-        points.append({"lat": float(row.LAT), "lon": float(row.LON), "tm": str(row.TM), "dist": round(float(row.Distance_km), 1)})
+        points.append({
+            "lat": float(row.LAT),
+            "lon": float(row.LON),
+            "tm": str(row.TM),
+            "dist": round(float(row.Distance_km), 1),
+            "wind": None if pd.isna(row.MAX_WIND_SPD) else round(float(row.MAX_WIND_SPD), 1),
+        })
     cyclone_tracks.append({"id": str(cid), "name": str(name), "year": year, "color": color, "points": points})
 
 tracks_json = json.dumps(cyclone_tracks)
@@ -126,7 +134,6 @@ summary_end_year = date_range[1].year
 
 summary_num_cyclones = len(cyclone_tracks)
 summary_num_days = len(unique_days)
-
 
 if not cyclone_tracks:
     st.info("No cyclones meet the current filters to animate.")
@@ -237,13 +244,13 @@ def build_html(map_h):
       statusEl.textContent = "Animation complete. " + tracks.length + " cyclone(s) shown.";
       playing = false; playPauseBtn.textContent = "Play";
       summaryBox.style.display = 'block';
-summaryBox.innerHTML =
-  'Between ' + summaryStartYear + ' and ' + summaryEndYear + ', ' +
-  '<span style="font-size:34px;color:#c62828;">' + summaryCyclonesCount + '</span>' +
-  ' tropical cyclone' + (summaryCyclonesCount === 1 ? '' : 's') +
-  ' tracked within ' + radiusKm + ' km of the Karratha Gas Plant across ' +
-  '<span style="font-size:34px;color:#1565c0;">' + summaryUniqueDays + '</span>' +
-  ' unique day' + (summaryUniqueDays === 1 ? '' : 's') + '.';
+      summaryBox.innerHTML =
+        'Between ' + summaryStartYear + ' and ' + summaryEndYear + ', ' +
+        '<span style="font-size:34px;color:#c62828;">' + summaryCyclonesCount + '</span>' +
+        ' tropical cyclone' + (summaryCyclonesCount === 1 ? '' : 's') +
+        ' tracked within ' + radiusKm + ' km of the Karratha Gas Plant across ' +
+        '<span style="font-size:34px;color:#1565c0;">' + summaryUniqueDays + '</span>' +
+        ' unique day' + (summaryUniqueDays === 1 ? '' : 's') + '.';
       return;
     }
     cycloneIdx = idx; pointIdx = 0; currentCoords = []; var t = tracks[cycloneIdx];
@@ -253,7 +260,18 @@ summaryBox.innerHTML =
     scheduleNext();
   }
 
-  function addPoint() { var t = tracks[cycloneIdx]; if (pointIdx >= t.points.length) { startCyclone(cycloneIdx + 1); return; } var p = t.points[pointIdx]; currentCoords.push([p.lat, p.lon]); currentPolyline.setLatLngs(currentCoords); var marker = L.circleMarker([p.lat, p.lon], { radius:5, color: t.color, fillColor: t.color, fillOpacity:0.9, weight:1 }).addTo(map); marker.bindTooltip(t.id + " (" + t.name + ") | " + p.tm + " | " + p.dist + " km | Wind: " + (p.wind !== null ? p.wind + " km/h" : "n/a")); }
+  function addPoint() {
+    var t = tracks[cycloneIdx];
+    if (pointIdx >= t.points.length) { startCyclone(cycloneIdx + 1); return; }
+    var p = t.points[pointIdx];
+    currentCoords.push([p.lat, p.lon]);
+    currentPolyline.setLatLngs(currentCoords);
+    var marker = L.circleMarker([p.lat, p.lon], { radius:5, color: t.color, fillColor: t.color, fillOpacity:0.9, weight:1 }).addTo(map);
+    marker.bindTooltip(t.id + " (" + t.name + ") | " + p.tm + " | " + p.dist + " km | Wind: " + (p.wind != null ? p.wind + " km/h" : "n/a"));
+    pointIdx += 1;
+    fmtStatus();
+    scheduleNext();
+  }
 
   function scheduleNext() { if (!playing) return; timer = setTimeout(addPoint, pointSpeedMs); }
 
@@ -358,8 +376,6 @@ st.dataframe(
     .rename(columns={"MAX_WIND_SPD": "MAX_WIND_SPD (km/h)", "MAX_WIND_GUST": "MAX_WIND_GUST (km/h)"})
 )
 
-import altair as alt
-
 # ---- Cyclone seasonality by month ----
 st.subheader("Cyclone seasonality by month")
 
@@ -389,4 +405,3 @@ st.altair_chart(chart, use_container_width=True)
 st.dataframe(monthly[["MonthName", "DISTURBANCE_ID"]]
              .rename(columns={"DISTURBANCE_ID": "Unique cyclones"}),
              hide_index=True)
-
