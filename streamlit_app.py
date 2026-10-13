@@ -29,7 +29,7 @@ st.subheader("Pin coordinates")
 c1, c2, c3 = st.columns(3)
 pin_lat = c1.number_input("Pin latitude", value=-20.591733, format="%.6f")
 pin_lon = c2.number_input("Pin longitude", value=116.777616, format="%.6f")
-radius_km = c3.slider("Radius (km)", min_value=50, max_value=2000, value=200, step=50)
+radius_km = c3.slider("Radius (km)", min_value=30, max_value=2000, value=200, step=50)
 
 df["Distance_km"] = haversine_vectorized(pin_lat, pin_lon, df["LAT"], df["LON"])
 
